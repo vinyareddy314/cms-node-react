@@ -483,10 +483,6 @@ function ProgramsView(props: { token: string; onLogout: () => void }) {
         </button>
       </header>
 
-      <p style={{ color: '#555', marginTop: 8 }}>
-        API base: <code>{apiBase}</code>
-      </p>
-
       {loading && <p>Loading programs…</p>}
       {error && <p style={{ color: '#b00020' }}>{error}</p>}
 
