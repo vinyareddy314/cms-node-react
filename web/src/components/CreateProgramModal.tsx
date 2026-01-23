@@ -47,12 +47,12 @@ export function CreateProgramModal({ onClose, onSuccess }: CreateProgramModalPro
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Description</label>
-                        <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3}
+                        <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} required
                             style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid #d1d5db', fontFamily: 'inherit' }} />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: 14, fontWeight: 500, marginBottom: 6 }}>Primary Language</label>
-                        <select value={lang} onChange={e => setLang(e.target.value)}
+                        <select value={lang} onChange={e => setLang(e.target.value)} required
                             style={{ width: '100%', padding: '10px', borderRadius: 6, border: '1px solid #d1d5db' }}>
                             <option value="en">English</option>
                             <option value="te">Telugu</option>
