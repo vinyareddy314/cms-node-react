@@ -8,6 +8,7 @@ import { authRouter } from './auth/routes';
 import { cmsProgramsRouter } from './cms/programs';
 import { cmsTopicsRouter } from './cms/topics';
 import { cmsTermsLessonsRouter } from './cms/terms_lessons';
+import { cmsUsersRouter } from './cms/users';
 import { catalogRouter } from './catalog/routes';
 import { ApiError } from './types';
 import { logger } from './logger';
@@ -38,6 +39,7 @@ app.get('/health', async (_req, res) => {
 
 // Auth + CMS routes
 app.use('/auth', authRouter);
+app.use('/cms/users', cmsUsersRouter);
 app.use('/cms/programs', cmsProgramsRouter);
 app.use('/cms/topics', cmsTopicsRouter);
 app.use('/cms', cmsTermsLessonsRouter);
