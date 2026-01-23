@@ -121,8 +121,8 @@ function buildLessonPayload(body: any) {
     Array.isArray(content_languages_available) && content_languages_available.length > 0
       ? content_languages_available
       : content_language_primary
-      ? [content_language_primary]
-      : [];
+        ? [content_language_primary]
+        : [];
 
   if (!content_language_primary || languagesAvailable.length === 0) {
     throw new ApiError({
@@ -145,8 +145,8 @@ function buildLessonPayload(body: any) {
     body.content_urls_by_language && typeof body.content_urls_by_language === 'object'
       ? body.content_urls_by_language
       : content_url_primary
-      ? { [content_language_primary]: content_url_primary }
-      : null;
+        ? { [content_language_primary]: content_url_primary }
+        : null;
 
   if (!contentUrls) {
     throw new ApiError({
@@ -367,7 +367,93 @@ cmsTermsLessonsRouter.post(
       const latest = await db('lessons').where({ id }).first();
       res.json({ lesson: latest });
     } catch (err) {
-      await trx.rollback();
+      next(err);
+    }
+  }
+);
+
+// Asset Management for Lessons
+cmsTermsLessonsRouter.post(
+  '/lessons/:id/assets',
+  requireRole(['admin', 'editor']),
+  async (req, res, next) => {
+    try {
+      const id = String(req.params.id);
+      const { language, variant, asset_type, url } = req.body || {};
+
+      if (!language || !variant || !asset_type || !url) {
+        throw new ApiError({
+          status: 400,
+          code: 'validation_error',
+          message: 'language, variant, asset_type, and url are required'
+        });
+      }
+
+      const variants = ['portrait', 'landscape', 'square', 'banner'];
+      if (!variants.includes(variant)) {
+        throw new ApiError({
+          status: 400,
+          code: 'validation_error',
+          message: `variant must be one of: ${variants.join(', ')}`
+        });
+      }
+
+      const types = ['thumbnail', 'subtitle'];
+      if (!types.includes(asset_type)) {
+        throw new ApiError({
+          status: 400,
+          code: 'validation_error',
+          message: `asset_type must be one of: ${types.join(', ')}`
+        });
+      }
+
+      // Upsert asset
+      await db('lesson_assets')
+        .insert({
+          id: uuid(),
+          lesson_id: id,
+          language,
+          variant,
+          asset_type,
+          url
+        })
+        .onConflict(['lesson_id', 'language', 'variant', 'asset_type'])
+        .merge(['url']);
+
+      res.json({ status: 'ok' });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+cmsTermsLessonsRouter.delete(
+  '/lessons/:id/assets',
+  requireRole(['admin', 'editor']),
+  async (req, res, next) => {
+    try {
+      const id = String(req.params.id);
+      const { language, variant, asset_type } = req.body || {};
+
+      if (!language || !variant || !asset_type) {
+        throw new ApiError({
+          status: 400,
+          code: 'validation_error',
+          message: 'language, variant, and asset_type are required'
+        });
+      }
+
+      await db('lesson_assets')
+        .where({
+          lesson_id: id,
+          language,
+          variant,
+          asset_type
+        })
+        .del();
+
+      res.status(204).send();
+    } catch (err) {
       next(err);
     }
   }
