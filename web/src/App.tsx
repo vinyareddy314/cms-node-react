@@ -3,6 +3,7 @@ import { User } from './types';
 import { Login } from './screens/Login';
 import { ProgramsList } from './screens/ProgramsList';
 import { ProgramDetail } from './screens/ProgramDetail';
+import { jwtDecode } from 'jwt-decode';
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -11,8 +12,18 @@ export default function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Ideally we should validate token or fetch user profile here
-      setUser({ id: 'cached', email: 'cached@user.com', role: 'editor' });
+      try {
+        const decoded: any = jwtDecode(token);
+        // Map JWT claims to User object
+        setUser({
+          id: decoded.sub || decoded.id,
+          email: decoded.email,
+          role: decoded.role || 'editor'
+        });
+      } catch (error) {
+        console.error('Failed to decode token:', error);
+        localStorage.removeItem('token');
+      }
     }
   }, []);
 

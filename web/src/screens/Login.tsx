@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { api } from '../api';
 import { User } from '../types';
+import { jwtDecode } from 'jwt-decode';
 
 interface LoginProps {
     onLogin: (user: User) => void;
 }
 
 export function Login({ onLogin }: LoginProps) {
-    const [email, setEmail] = useState('editor@example.com');
-    const [password, setPassword] = useState('password123');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -22,7 +23,13 @@ export function Login({ onLogin }: LoginProps) {
                 body: JSON.stringify({ email, password })
             });
             localStorage.setItem('token', data.access_token);
-            onLogin(data.user || { id: 'temp', email, role: 'editor' });
+
+            const decoded: any = jwtDecode(data.access_token);
+            onLogin({
+                id: decoded.sub || decoded.id,
+                email: decoded.email,
+                role: decoded.role || 'editor'
+            });
         } catch (err: any) {
             setError(err.message);
         } finally {
